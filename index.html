@@ -1,0 +1,378 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BKP 2048</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #080b12;
+    color: white;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+}
+
+h1 {
+    color: #38bdf8;
+    font-size: 48px;
+    margin-bottom: 5px;
+}
+
+p {
+    color: #a7b2c5;
+}
+
+.info {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.box {
+    background: #111827;
+    border: 1px solid #263449;
+    border-radius: 10px;
+    padding: 12px 22px;
+    min-width: 110px;
+}
+
+.box strong {
+    display: block;
+    color: #38bdf8;
+    font-size: 22px;
+    margin-top: 5px;
+}
+
+button {
+    cursor: pointer;
+    border: 1px solid #38bdf8;
+    border-radius: 8px;
+    padding: 12px 18px;
+    background: #111827;
+    color: #38bdf8;
+    font-size: 15px;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #17283a;
+}
+
+#tabuleiro {
+    width: min(92vw, 400px);
+    aspect-ratio: 1;
+    margin: 20px auto;
+    padding: 8px;
+    background: #172033;
+    border: 1px solid #263449;
+    border-radius: 12px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    gap: 8px;
+    touch-action: none;
+}
+
+.celula {
+    min-width: 0;
+    min-height: 0;
+    border-radius: 7px;
+    background: #263247;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(20px, 6vw, 32px);
+    font-weight: bold;
+    color: white;
+}
+
+.v2 { background: #dbeafe; color: #1e293b; }
+.v4 { background: #93c5fd; color: #10233d; }
+.v8 { background: #38bdf8; color: #071827; }
+.v16 { background: #0ea5e9; }
+.v32 { background: #0284c7; }
+.v64 { background: #0369a1; }
+.v128 { background: #2563eb; font-size: clamp(17px, 5vw, 26px); }
+.v256 { background: #4f46e5; font-size: clamp(17px, 5vw, 26px); }
+.v512 { background: #7c3aed; font-size: clamp(17px, 5vw, 26px); }
+.v1024 { background: #9333ea; font-size: clamp(14px, 4vw, 22px); }
+.v2048 { background: #f59e0b; color: #171717; font-size: clamp(14px, 4vw, 22px); }
+
+#mensagem {
+    min-height: 25px;
+    color: #38bdf8;
+    font-weight: bold;
+}
+
+a {
+    color: #38bdf8;
+}
+
+footer {
+    margin-top: 35px;
+    color: #64748b;
+    font-size: 13px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>2048</h1>
+<p>Combine os numeros e alcance 2048!</p>
+
+<div class="info">
+    <div class="box">
+        Pontos
+        <strong id="pontos">0</strong>
+    </div>
+    <div class="box">
+        Recorde
+        <strong id="recorde">0</strong>
+    </div>
+</div>
+
+<button onclick="novoJogo()">Novo jogo</button>
+
+<div id="tabuleiro"></div>
+<div id="mensagem"></div>
+
+<p>Use as setas do teclado ou deslize na tela.</p>
+
+<footer>
+    BKP Unblocked Games
+    <br><br>
+    <a href="index.html">Voltar ao inicio</a>
+</footer>
+
+<script>
+const tamanho = 4;
+let grade = [];
+let pontos = 0;
+let terminou = false;
+let ganhou = false;
+
+let recorde = 0;
+
+try {
+    recorde = Number(localStorage.getItem("bkp2048_recorde")) || 0;
+} catch (e) {}
+
+function novoJogo() {
+    grade = Array.from({ length: tamanho }, () => Array(tamanho).fill(0));
+    pontos = 0;
+    terminou = false;
+    ganhou = false;
+
+    document.getElementById("mensagem").textContent = "";
+
+    adicionarNumero();
+    adicionarNumero();
+    desenhar();
+}
+
+function adicionarNumero() {
+    const vazias = [];
+
+    for (let y = 0; y < tamanho; y++) {
+        for (let x = 0; x < tamanho; x++) {
+            if (grade[y][x] === 0) {
+                vazias.push({ x, y });
+            }
+        }
+    }
+
+    if (vazias.length === 0) return;
+
+    const pos = vazias[Math.floor(Math.random() * vazias.length)];
+    grade[pos.y][pos.x] = Math.random() < 0.9 ? 2 : 4;
+}
+
+function desenhar() {
+    const tabuleiro = document.getElementById("tabuleiro");
+    tabuleiro.innerHTML = "";
+
+    for (let y = 0; y < tamanho; y++) {
+        for (let x = 0; x < tamanho; x++) {
+            const valor = grade[y][x];
+            const celula = document.createElement("div");
+
+            celula.className = "celula";
+
+            if (valor > 0) {
+                celula.textContent = valor;
+                celula.classList.add("v" + valor);
+            }
+
+            tabuleiro.appendChild(celula);
+        }
+    }
+
+    document.getElementById("pontos").textContent = pontos;
+    document.getElementById("recorde").textContent = recorde;
+}
+
+function moverLinha(linha) {
+    let numeros = linha.filter(n => n !== 0);
+    let nova = [];
+    let ganhouAgora = false;
+
+    for (let i = 0; i < numeros.length; i++) {
+        if (numeros[i] === numeros[i + 1]) {
+            const valor = numeros[i] * 2;
+            nova.push(valor);
+            pontos += valor;
+
+            if (valor === 2048) ganhouAgora = true;
+
+            i++;
+        } else {
+            nova.push(numeros[i]);
+        }
+    }
+
+    while (nova.length < tamanho) nova.push(0);
+
+    return { nova, ganhouAgora };
+}
+
+function jogar(direcao) {
+    if (terminou) return;
+
+    const anterior = JSON.stringify(grade);
+    let ganhouAgora = false;
+
+    if (direcao === "esquerda" || direcao === "direita") {
+        for (let y = 0; y < tamanho; y++) {
+            let linha = [...grade[y]];
+
+            if (direcao === "direita") linha.reverse();
+
+            const resultado = moverLinha(linha);
+
+            linha = resultado.nova;
+
+            if (direcao === "direita") linha.reverse();
+
+            grade[y] = linha;
+            ganhouAgora ||= resultado.ganhouAgora;
+        }
+    } else {
+        for (let x = 0; x < tamanho; x++) {
+            let linha = [];
+
+            for (let y = 0; y < tamanho; y++) {
+                linha.push(grade[y][x]);
+            }
+
+            if (direcao === "baixo") linha.reverse();
+
+            const resultado = moverLinha(linha);
+            linha = resultado.nova;
+
+            if (direcao === "baixo") linha.reverse();
+
+            for (let y = 0; y < tamanho; y++) {
+                grade[y][x] = linha[y];
+            }
+
+            ganhouAgora ||= resultado.ganhouAgora;
+        }
+    }
+
+    if (JSON.stringify(grade) === anterior) return;
+
+    if (pontos > recorde) {
+        recorde = pontos;
+
+        try {
+            localStorage.setItem("bkp2048_recorde", recorde);
+        } catch (e) {}
+    }
+
+    adicionarNumero();
+
+    if (ganhouAgora && !ganhou) {
+        ganhou = true;
+        document.getElementById("mensagem").textContent =
+            "Parabens! Voce alcancou 2048!";
+    }
+
+    if (!temMovimentos()) {
+        terminou = true;
+        document.getElementById("mensagem").textContent =
+            "Fim de jogo! Clique em Novo jogo para tentar novamente.";
+    }
+
+    desenhar();
+}
+
+function temMovimentos() {
+    for (let y = 0; y < tamanho; y++) {
+        for (let x = 0; x < tamanho; x++) {
+            if (grade[y][x] === 0) return true;
+
+            if (x + 1 < tamanho && grade[y][x] === grade[y][x + 1]) {
+                return true;
+            }
+
+            if (y + 1 < tamanho && grade[y][x] === grade[y + 1][x]) {
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+document.addEventListener("keydown", function(evento) {
+    const teclas = {
+        ArrowLeft: "esquerda",
+        ArrowRight: "direita",
+        ArrowUp: "cima",
+        ArrowDown: "baixo"
+    };
+
+    if (teclas[evento.key]) {
+        evento.preventDefault();
+        jogar(teclas[evento.key]);
+    }
+});
+
+let toqueX = 0;
+let toqueY = 0;
+
+const tabuleiro = document.getElementById("tabuleiro");
+
+tabuleiro.addEventListener("touchstart", function(evento) {
+    toqueX = evento.changedTouches[0].clientX;
+    toqueY = evento.changedTouches[0].clientY;
+}, { passive: true });
+
+tabuleiro.addEventListener("touchend", function(evento) {
+    const dx = evento.changedTouches[0].clientX - toqueX;
+    const dy = evento.changedTouches[0].clientY - toqueY;
+
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 25) return;
+
+    if (Math.abs(dx) > Math.abs(dy)) {
+        jogar(dx > 0 ? "direita" : "esquerda");
+    } else {
+        jogar(dy > 0 ? "baixo" : "cima");
+    }
+}, { passive: true });
+
+novoJogo();
+</script>
+
+</body>
+</html>
